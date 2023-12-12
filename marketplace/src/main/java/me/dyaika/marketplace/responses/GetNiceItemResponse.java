@@ -3,23 +3,23 @@ package me.dyaika.marketplace.responses;
 import lombok.Data;
 
 @Data
-public class GetItemResponse {
+public class GetNiceItemResponse {
 
     private Long itemId;
     private String itemName;
     private String itemDescription;
-    private Integer categoryId;
+    private String categoryName;
 
     // Конструкторы, геттеры и сеттеры (автоматически добавятся Lombok)
 
-    public GetItemResponse() {
+    public GetNiceItemResponse() {
     }
 
-    public GetItemResponse(Long itemId, String itemName, String itemDescription, Integer categoryId) {
+    public GetNiceItemResponse(Long itemId, String itemName, String itemDescription, String categoryName) {
         this.itemId = itemId;
         this.itemName = itemName;
         this.itemDescription = itemDescription;
-        this.categoryId = categoryId;
+        this.categoryName = categoryName;
     }
 }
 

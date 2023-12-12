@@ -76,7 +76,7 @@ CREATE TABLE item_shop_prices (
     price_check_date TIMESTAMP DEFAULT NOW(),
     item_price DECIMAL(22, 2) NOT NULL,
     PRIMARY KEY (shop_id, item_id, price_check_date),
-    FOREIGN KEY (shop_id, item_id) REFERENCES item_shop_associations (shop_id, item_id)
+    FOREIGN KEY (shop_id, item_id) REFERENCES item_shop_associations (shop_id, item_id) ON DELETE CASCADE
 );
 
 INSERT INTO item_shop_prices (shop_id, item_id, price_check_date, item_price) VALUES

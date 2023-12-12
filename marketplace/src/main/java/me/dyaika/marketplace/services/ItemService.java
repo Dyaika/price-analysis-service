@@ -27,6 +27,34 @@ public class ItemService {
         return optionalItem.orElse(null);
     }
 
-    // Другие методы, если необходимо, например, для создания, обновления, удаления товара
+    public Item createItem(Item newItem) {
+        // Дополнительная логика (если нужна) перед сохранением, например, валидация
+        return itemRepository.save(newItem);
+    }
+
+    public Item updateItem(Long itemId, Item updatedItem) {
+        Optional<Item> optionalExistingItem = itemRepository.findById(itemId);
+
+        if (optionalExistingItem.isPresent()) {
+            Item existingItem = optionalExistingItem.get();
+            // Обновление полей товара
+            existingItem.setItemName(updatedItem.getItemName());
+            existingItem.setItemDescription(updatedItem.getItemDescription());
+            existingItem.setCategoryId(updatedItem.getCategoryId());
+
+            // Дополнительная логика (если нужна) перед сохранением, например, валидация
+
+            return itemRepository.save(existingItem);
+        } else {
+            return null; // Товар с указанным ID не найден
+        }
+    }
+
+    public void deleteItem(Long itemId) {
+        itemRepository.deleteById(itemId);
+        // Дополнительная логика после удаления (если нужна)
+    }
+
+    // Другие методы, если необходимо
 }
 

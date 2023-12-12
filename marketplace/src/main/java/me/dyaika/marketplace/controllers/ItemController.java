@@ -4,13 +4,13 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import me.dyaika.marketplace.entities.Item;
 import me.dyaika.marketplace.responses.GetItemResponse;
+import me.dyaika.marketplace.responses.GetNiceItemResponse;
 import me.dyaika.marketplace.services.ItemService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Api(tags = "Товары.", description = "Просмотр информации о товарах, наличии и ценах.")
 @RestController
@@ -23,14 +23,14 @@ public class ItemController {
         this.itemService = itemService;
     }
 
-    @ApiOperation("Просмотр информации о товаре.")
-    @GetMapping("/{item_id}")
-    public ResponseEntity<GetItemResponse> getItem(@PathVariable Long item_id) {
+    @ApiOperation("Просмотр информации о товаре красиво.")
+    @GetMapping("/{item_id}/nice")
+    public ResponseEntity<GetNiceItemResponse> getNiceItem(@PathVariable Long item_id) {
         Item item = itemService.getItemById(item_id);
 
         if (item != null) {
             // Создаем объект GetItemResponse на основе данных о товаре
-            GetItemResponse response = new GetItemResponse(
+            GetNiceItemResponse response = new GetNiceItemResponse(
                     item.getItemId(),
                     item.getItemName(),
                     item.getItemDescription(),
@@ -41,5 +41,47 @@ public class ItemController {
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+    @ApiOperation("Просмотр информации о товаре как в базе.")
+    @GetMapping("/{item_id}")
+    public ResponseEntity<GetItemResponse> getItem(@PathVariable Long item_id) {
+        Item item = itemService.getItemById(item_id);
+
+        if (item != null) {
+            // Создаем объект GetItemResponse на основе данных о товаре
+            GetItemResponse response = new GetItemResponse(
+                    item.getItemId(),
+                    item.getItemName(),
+                    item.getItemDescription(),
+                    item.getCategory().getCategoryId()
+            );
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @ApiOperation("Просмотр списка всех товаров.")
+    @GetMapping("/all")
+    public List<Item> getAllItems() {
+        return itemService.getAllItems();
+    }
+
+    @ApiOperation("Удаление товара.")
+    @DeleteMapping("/delete/{item_id}")
+    public void deleteItem(@PathVariable Long item_id) {
+        itemService.deleteItem(item_id);
+    }
+    @ApiOperation("Создание нового товара.")
+    @PostMapping("/create")
+    public Item createItem(@RequestBody Item newItem) {
+        return itemService.createItem(newItem);
+    }
+
+    @ApiOperation("Обновление информации о товаре.")
+    @PutMapping("/update/{item_id}")
+    public Item updateItem(@PathVariable Long item_id, @RequestBody Item updatedItem) {
+        return itemService.updateItem(item_id, updatedItem);
     }
 }
