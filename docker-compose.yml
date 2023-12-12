@@ -1,0 +1,24 @@
+version: '1.0'
+
+services:   
+    db:
+        container_name: db
+        image: postgres:latest
+        restart: always
+        environment:
+            POSTGRES_DB: marketplaceDB
+            POSTGRES_USER: user
+            POSTGRES_PASSWORD: password
+        volumes:
+            - ./db:/docker-entrypoint-initdb.d
+        ports:
+            - "5432:5432"
+            
+    app:
+        depends_on:
+           - db
+        build:
+            context: ./marketplace
+            dockerfile: Dockerfile
+        ports:
+           - "80:8000"
