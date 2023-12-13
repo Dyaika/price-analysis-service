@@ -5,6 +5,9 @@ import io.swagger.annotations.ApiOperation;
 import me.dyaika.marketplace.entities.Shop;
 import me.dyaika.marketplace.services.ShopService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,7 +37,7 @@ public class ShopController {
     }
 
     @ApiOperation("Создать новый магазин.")
-    @PostMapping
+    @PostMapping("/create")
     public Shop createShop(@RequestBody Shop shop) {
         return shopService.saveShop(shop);
     }
@@ -55,8 +58,13 @@ public class ShopController {
 
     @ApiOperation("Удалить магазин по его ID.")
     @DeleteMapping("/{shopId}")
-    public void deleteShop(@PathVariable Long shopId) {
-        shopService.deleteShop(shopId);
+    public ResponseEntity<Long> deleteShop(@PathVariable Long shopId) {
+        try {
+            shopService.deleteShop(shopId);
+            return new ResponseEntity<>(shopId, HttpStatus.OK);
+        } catch (EmptyResultDataAccessException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }
 

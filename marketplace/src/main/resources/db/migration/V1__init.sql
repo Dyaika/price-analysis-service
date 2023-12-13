@@ -19,7 +19,7 @@ CREATE TABLE items
     item_id          BIGSERIAL PRIMARY KEY,
     item_name        VARCHAR(100) NOT NULL,
     item_description TEXT    DEFAULT NULL,
-    category_id      INTEGER DEFAULT 1,
+    category_id      INTEGER DEFAULT 1  NOT NULL,
     FOREIGN KEY (category_id) REFERENCES categories (category_id)
 );
 
@@ -35,9 +35,9 @@ VALUES ('Смартфон Galaxy S21', 'Премиальный смартфон 
 
 CREATE TABLE item_parameters
 (
-    item_id         BIGINT,
-    parameter_name  VARCHAR(255),
-    parameter_value VARCHAR(255),
+    item_id         BIGINT NOT NULL,
+    parameter_name  VARCHAR(255) NOT NULL,
+    parameter_value VARCHAR(255) NOT NULL,
     PRIMARY KEY (item_id, parameter_name),
     FOREIGN KEY (item_id) REFERENCES items (item_id) ON DELETE CASCADE
 );
