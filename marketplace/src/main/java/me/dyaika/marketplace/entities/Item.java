@@ -1,4 +1,6 @@
 package me.dyaika.marketplace.entities;
+
+
 import javax.persistence.*;
 
 @Entity
