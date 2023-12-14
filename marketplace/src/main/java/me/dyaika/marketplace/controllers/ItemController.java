@@ -3,11 +3,10 @@ package me.dyaika.marketplace.controllers;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import me.dyaika.marketplace.entities.Item;
-import me.dyaika.marketplace.entities.ItemParameter;
-import me.dyaika.marketplace.requests.CreateItemRequest;
-import me.dyaika.marketplace.requests.UpdateItemRequest;
-import me.dyaika.marketplace.responses.GetItemResponse;
-import me.dyaika.marketplace.responses.GetNiceItemResponse;
+import me.dyaika.marketplace.dto.requests.CreateItemRequest;
+import me.dyaika.marketplace.dto.requests.UpdateItemRequest;
+import me.dyaika.marketplace.dto.responses.GetItemResponse;
+import me.dyaika.marketplace.dto.responses.GetNiceItemResponse;
 import me.dyaika.marketplace.services.ItemService;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
@@ -16,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Api(tags = "Товары.", description = "Просмотр информации о товарах, наличии и ценах.")
+@Api(tags = "Товары.", description = "Просмотр информации о товарах.")
 @RestController
 @RequestMapping("/item")
 public class ItemController {

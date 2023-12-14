@@ -1,4 +1,4 @@
-package me.dyaika.marketplace.responses;
+package me.dyaika.marketplace.dto.responses;
 
 import lombok.Data;
 import java.util.HashMap;

@@ -1,9 +1,9 @@
-package me.dyaika.marketplace.requests;
+package me.dyaika.marketplace.dto;
 
 import lombok.Data;
 
 @Data
-public class ItemParameterRequest {
+public class ItemParameter {
 
     private String parameterName;
     private String parameterValue;

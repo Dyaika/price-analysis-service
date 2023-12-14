@@ -1,6 +1,7 @@
-package me.dyaika.marketplace.requests;
+package me.dyaika.marketplace.dto.requests;
 
 import lombok.Data;
+import me.dyaika.marketplace.dto.ItemParameter;
 
 import java.util.List;
 
@@ -9,5 +10,5 @@ public class UpdateItemRequest {
     private String itemName;
     private String itemDescription;
     private Integer categoryId;
-    private List<ItemParameterRequest> parameters;
+    private List<ItemParameter> parameters;
 }

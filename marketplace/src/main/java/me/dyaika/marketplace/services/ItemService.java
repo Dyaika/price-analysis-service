@@ -1,13 +1,12 @@
 package me.dyaika.marketplace.services;
 
 import me.dyaika.marketplace.entities.Item;
-import me.dyaika.marketplace.entities.ItemParameter;
 import me.dyaika.marketplace.repositories.ItemParameterRepository;
 import me.dyaika.marketplace.repositories.ItemRepository;
-import me.dyaika.marketplace.requests.CreateItemRequest;
-import me.dyaika.marketplace.requests.ItemParameterRequest;
-import me.dyaika.marketplace.requests.UpdateItemRequest;
-import me.dyaika.marketplace.responses.GetNiceItemResponse;
+import me.dyaika.marketplace.dto.requests.CreateItemRequest;
+import me.dyaika.marketplace.dto.ItemParameter;
+import me.dyaika.marketplace.dto.requests.UpdateItemRequest;
+import me.dyaika.marketplace.dto.responses.GetNiceItemResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -47,8 +46,8 @@ public class ItemService {
 
         // Сохранение параметров товара
         if (request.getParameters() != null) {
-            for (ItemParameterRequest parameterRequest : request.getParameters()) {
-                ItemParameter parameter = new ItemParameter();
+            for (ItemParameter parameterRequest : request.getParameters()) {
+                me.dyaika.marketplace.entities.ItemParameter parameter = new me.dyaika.marketplace.entities.ItemParameter();
                 parameter.setItemId(newItem.getItemId());
                 parameter.setParameterName(parameterRequest.getParameterName());
                 parameter.setParameterValue(parameterRequest.getParameterValue());
@@ -74,10 +73,10 @@ public class ItemService {
             parameterRepository.deleteByItemId(itemId);
 
             // Добавление новых параметров
-            List<ItemParameterRequest> newParameters = updateRequest.getParameters();
+            List<ItemParameter> newParameters = updateRequest.getParameters();
             if (newParameters != null) {
-                for (ItemParameterRequest parameterRequest : newParameters) {
-                    ItemParameter parameter = new ItemParameter();
+                for (ItemParameter parameterRequest : newParameters) {
+                    me.dyaika.marketplace.entities.ItemParameter parameter = new me.dyaika.marketplace.entities.ItemParameter();
                     parameter.setItemId(itemId);
                     parameter.setParameterName(parameterRequest.getParameterName());
                     parameter.setParameterValue(parameterRequest.getParameterValue());
@@ -98,7 +97,7 @@ public class ItemService {
         // Дополнительная логика после удаления (если нужна)
     }
 
-    public List<ItemParameter> findParameters(Long itemId){
+    public List<me.dyaika.marketplace.entities.ItemParameter> findParameters(Long itemId){
         return parameterRepository.findByItemId(itemId);
     }
 
@@ -106,7 +105,7 @@ public class ItemService {
         Item item = itemRepository.findById(itemId).orElse(null);
 
         if (item != null) {
-            List<ItemParameter> parameters = findParameters(itemId);
+            List<me.dyaika.marketplace.entities.ItemParameter> parameters = findParameters(itemId);
             HashMap<String, String> params = convertParametersToMap(parameters);
 
             GetNiceItemResponse response = new GetNiceItemResponse(
@@ -122,10 +121,10 @@ public class ItemService {
         return null;
     }
 
-    private HashMap<String, String> convertParametersToMap(List<ItemParameter> parameters) {
+    private HashMap<String, String> convertParametersToMap(List<me.dyaika.marketplace.entities.ItemParameter> parameters) {
         HashMap<String, String> paramsMap = new HashMap<>();
 
-        for (ItemParameter parameter : parameters) {
+        for (me.dyaika.marketplace.entities.ItemParameter parameter : parameters) {
             paramsMap.put(parameter.getParameterName(), parameter.getParameterValue());
         }
 
