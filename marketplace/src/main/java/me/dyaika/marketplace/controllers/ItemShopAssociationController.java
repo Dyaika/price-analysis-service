@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import me.dyaika.marketplace.dto.AssociatedItem;
 import me.dyaika.marketplace.dto.responses.GetShopAssociationsResponse;
 import me.dyaika.marketplace.entities.ItemShopAssociation;
+import me.dyaika.marketplace.security.RoleChecker;
 import me.dyaika.marketplace.services.ItemShopAssociationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -12,47 +13,62 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Api(tags = "Ассоциация товар-магазин.", description = "Управление информацией о товарах в магазине.")
 @RestController
-@RequestMapping("/item-shop-associations")
+@RequestMapping("/item-shop")
 public class ItemShopAssociationController {
 
     private final ItemShopAssociationService itemShopAssociationService;
+    private final RoleChecker roleChecker;
 
     @Autowired
-    public ItemShopAssociationController(ItemShopAssociationService itemShopAssociationService) {
+    public ItemShopAssociationController(ItemShopAssociationService itemShopAssociationService, RoleChecker roleChecker) {
         this.itemShopAssociationService = itemShopAssociationService;
+        this.roleChecker = roleChecker;
     }
 
     @ApiOperation("Добавление товара в магазин.")
     @PostMapping
-    public ResponseEntity<Void> addItemToShop(@RequestBody ItemShopAssociation request) {
-        itemShopAssociationService.addItemToShop(request);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<Void> addItemToShop(@RequestBody ItemShopAssociation request, HttpServletRequest httpRequest) {
+        if (roleChecker.checkRole("ADMIN", httpRequest)){
+            itemShopAssociationService.addItemToShop(request);
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 
     @ApiOperation("Обновление ссылки товара в магазине.")
     @PutMapping("/update")
-    public ResponseEntity<ItemShopAssociation> updateItemUrlInShop(@RequestBody ItemShopAssociation request) {
-        ItemShopAssociation response = itemShopAssociationService.updateItemShopAssociation(request);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public ResponseEntity<ItemShopAssociation> updateItemUrlInShop(@RequestBody ItemShopAssociation request, HttpServletRequest httpRequest) {
+        if (roleChecker.checkRole("ADMIN", httpRequest)){
+            ItemShopAssociation response = itemShopAssociationService.updateItemShopAssociation(request);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 
     @ApiOperation("Удаление товара из магазина.")
     @DeleteMapping("/{shopId}/{itemId}")
     public ResponseEntity<Void> removeItemFromShop(
             @PathVariable Long shopId,
-            @PathVariable Long itemId) {
-        try {
-            itemShopAssociationService.removeItemFromShop(shopId, itemId);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (EmptyResultDataAccessException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            @PathVariable Long itemId,
+            HttpServletRequest httpRequest) {
+        if (roleChecker.checkRole("ADMIN", httpRequest)){
+            try {
+                itemShopAssociationService.removeItemFromShop(shopId, itemId);
+                return new ResponseEntity<>(HttpStatus.OK);
+            } catch (EmptyResultDataAccessException e) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-
     }
 
     @ApiOperation("Просмотр записей о товарах в магазине.")

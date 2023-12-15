@@ -8,6 +8,7 @@ import me.dyaika.marketplace.dto.responses.GetShopItemsIdResponse;
 import me.dyaika.marketplace.dto.responses.GetShopItemsResponse;
 import me.dyaika.marketplace.entities.ItemShopAssociation;
 import me.dyaika.marketplace.entities.Shop;
+import me.dyaika.marketplace.security.RoleChecker;
 import me.dyaika.marketplace.services.ItemShopAssociationService;
 import me.dyaika.marketplace.services.ShopService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -26,11 +28,13 @@ public class ShopController {
 
     private final ShopService shopService;
     private final ItemShopAssociationService associationService;
+    private final RoleChecker roleChecker;
 
     @Autowired
-    public ShopController(ShopService shopService, ItemShopAssociationService associationService) {
+    public ShopController(ShopService shopService, ItemShopAssociationService associationService, RoleChecker roleChecker) {
         this.shopService = shopService;
         this.associationService = associationService;
+        this.roleChecker = roleChecker;
     }
 
     @ApiOperation("Получить список всех магазинов.")
@@ -47,32 +51,44 @@ public class ShopController {
 
     @ApiOperation("Создать новый магазин.")
     @PostMapping("/create")
-    public Shop createShop(@RequestBody Shop shop) {
-        return shopService.saveShop(shop);
+    public ResponseEntity<Shop> createShop(@RequestBody Shop shop, HttpServletRequest httpRequest) {
+        if (roleChecker.checkRole("ADMIN", httpRequest)){
+            return new ResponseEntity<>(shopService.saveShop(shop), HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 
     @ApiOperation("Обновить информацию о существующем магазине.")
     @PutMapping("/{shopId}")
-    public Shop updateShop(@PathVariable Long shopId, @RequestBody Shop updatedShop) {
-        Shop existingShop = shopService.getShopById(shopId);
-        if (existingShop != null) {
-            // Обновляем информацию
-            existingShop.setShopName(updatedShop.getShopName());
-            existingShop.setShopDescription(updatedShop.getShopDescription());
-            existingShop.setShopUrl(updatedShop.getShopUrl());
-            return shopService.saveShop(existingShop);
+    public ResponseEntity<Shop> updateShop(@PathVariable Long shopId, @RequestBody Shop updatedShop, HttpServletRequest httpRequest) {
+        if (roleChecker.checkRole("ADMIN", httpRequest)){
+            Shop existingShop = shopService.getShopById(shopId);
+            if (existingShop != null) {
+                // Обновляем информацию
+                existingShop.setShopName(updatedShop.getShopName());
+                existingShop.setShopDescription(updatedShop.getShopDescription());
+                existingShop.setShopUrl(updatedShop.getShopUrl());
+                return new ResponseEntity<>(shopService.saveShop(existingShop), HttpStatus.OK);
+            }
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-        return null; // Можно также вернуть ResponseEntity с кодом 404, чтобы показать, что магазин не найден
     }
 
     @ApiOperation("Удалить магазин по его ID.")
     @DeleteMapping("/{shopId}")
-    public ResponseEntity<Long> deleteShop(@PathVariable Long shopId) {
-        try {
-            shopService.deleteShop(shopId);
-            return new ResponseEntity<>(shopId, HttpStatus.OK);
-        } catch (EmptyResultDataAccessException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    public ResponseEntity<Long> deleteShop(@PathVariable Long shopId, HttpServletRequest httpRequest) {
+        if (roleChecker.checkRole("ADMIN", httpRequest)){
+            try {
+                shopService.deleteShop(shopId);
+                return new ResponseEntity<>(shopId, HttpStatus.OK);
+            } catch (EmptyResultDataAccessException e) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
     }
 
@@ -101,9 +117,13 @@ public class ShopController {
 
     @ApiOperation("Уставновить цену на товар.")
     @PostMapping("/{shopId}/set-price")
-    public ResponseEntity<Void> setActualPrice(@PathVariable Long shopId, @RequestBody SetActualPriceRequest request) {
-        shopService.setActualPrice(shopId, request.getItemId(), request.getPrice());
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<Void> setActualPrice(@PathVariable Long shopId, @RequestBody SetActualPriceRequest request, HttpServletRequest httpRequest) {
+        if (roleChecker.checkRole("ADMIN", httpRequest)){
+            shopService.setActualPrice(shopId, request.getItemId(), request.getPrice());
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
     @ApiOperation("Узнать о товаре в магазине.")
     @GetMapping("/{shopId}/items/{itemId}")

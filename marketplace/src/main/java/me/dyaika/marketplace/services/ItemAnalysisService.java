@@ -122,13 +122,13 @@ public class ItemAnalysisService {
 
     private String generateRecommendation(AnalyseResponse response) {
         BigDecimal minActualPrice = response.getMinActualPrice();
-        BigDecimal averageActualPrice = response.getAverageActualPrice();
+        BigDecimal averagePriceEver = response.getAveragePriceEver();
         BigDecimal minPriceEver = response.getMinPriceEver();
 
         if (minActualPrice.compareTo(minPriceEver) <= 0) {
             // Если текущая цена ниже минимальной цены за все время, рекомендуем покупать сейчас
             return "Рекомендуем покупать сейчас, так как цена минимальная за все время.";
-        } else if (minActualPrice.compareTo(averageActualPrice) <= 0) {
+        } else if (minActualPrice.compareTo(averagePriceEver) <= 0) {
             // Если текущая цена ниже средней цены, но выше минимальной за все время, рекомендуем подождать
             return "Покупка допустима, так как цена ниже средней, однако она выше минимальной за все время.";
         } else {

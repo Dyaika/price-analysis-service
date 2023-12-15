@@ -7,12 +7,14 @@ import me.dyaika.marketplace.dto.requests.CreateItemRequest;
 import me.dyaika.marketplace.dto.requests.UpdateItemRequest;
 import me.dyaika.marketplace.dto.responses.GetItemResponse;
 import me.dyaika.marketplace.dto.responses.GetNiceItemResponse;
+import me.dyaika.marketplace.security.RoleChecker;
 import me.dyaika.marketplace.services.ItemService;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @Api(tags = "Товары.", description = "Просмотр информации о товарах.")
@@ -20,10 +22,12 @@ import java.util.List;
 @RequestMapping("/item")
 public class ItemController {
 
-    private final ItemService itemService; // Предполагаем, что у вас есть сервис для работы с товарами
+    private final ItemService itemService;
+    private final RoleChecker roleChecker;
 
-    public ItemController(ItemService itemService) {
+    public ItemController(ItemService itemService, RoleChecker roleChecker) {
         this.itemService = itemService;
+        this.roleChecker = roleChecker;
     }
 
     @ApiOperation("Просмотр информации о товаре красиво.")
@@ -66,25 +70,37 @@ public class ItemController {
 
     @ApiOperation("Удаление товара.")
     @DeleteMapping("/{item_id}")
-    public ResponseEntity<Long> deleteItem(@PathVariable Long item_id) {
-        try {
-            itemService.deleteItem(item_id);
-            return new ResponseEntity<>(item_id, HttpStatus.OK);
-        } catch (EmptyResultDataAccessException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    public ResponseEntity<Long> deleteItem(@PathVariable Long item_id, HttpServletRequest request) {
+        if (roleChecker.checkRole("ADMIN", request)){
+            try {
+                itemService.deleteItem(item_id);
+                return new ResponseEntity<>(item_id, HttpStatus.OK);
+            } catch (EmptyResultDataAccessException e) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
     }
 
 
     @ApiOperation("Создание нового товара.")
     @PostMapping("/create")
-    public Long createItem(@RequestBody CreateItemRequest newItem) {
-        return itemService.createItem(newItem);
+    public ResponseEntity<Long> createItem(@RequestBody CreateItemRequest newItem, HttpServletRequest request) {
+        if (roleChecker.checkRole("ADMIN", request)){
+            return new ResponseEntity<>(itemService.createItem(newItem), HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 
     @ApiOperation("Обновление информации о товаре.")
     @PutMapping("/update/{item_id}")
-    public ResponseEntity<GetItemResponse> updateItem(@PathVariable Long item_id, @RequestBody UpdateItemRequest updatedItem) {
-        return getItem(itemService.updateItem(item_id, updatedItem));
+    public ResponseEntity<GetItemResponse> updateItem(@PathVariable Long item_id, @RequestBody UpdateItemRequest updatedItem, HttpServletRequest request) {
+        if (roleChecker.checkRole("ADMIN", request)){
+            return getItem(itemService.updateItem(item_id, updatedItem));
+        } else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 }
