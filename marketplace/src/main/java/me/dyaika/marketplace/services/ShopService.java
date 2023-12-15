@@ -2,10 +2,12 @@ package me.dyaika.marketplace.services;
 
 import me.dyaika.marketplace.dto.ShopItem;
 import me.dyaika.marketplace.entities.Item;
+import me.dyaika.marketplace.entities.ItemShopAssociation;
 import me.dyaika.marketplace.entities.ItemShopPrice;
 import me.dyaika.marketplace.entities.Shop;
 import me.dyaika.marketplace.repositories.ItemRepository;
 import me.dyaika.marketplace.repositories.ItemShopPriceRepository;
+import me.dyaika.marketplace.repositories.ItemShopRepository;
 import me.dyaika.marketplace.repositories.ShopRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -25,16 +27,19 @@ public class ShopService {
     private final NamedParameterJdbcTemplate template;
     private final ItemRepository itemRepository;
     private final ItemShopPriceRepository priceRepository;
+    private final ItemShopRepository itemShopRepository;
 
     @Autowired
     public ShopService(ShopRepository shopRepository,
                        ItemShopPriceRepository priceRepository,
                        NamedParameterJdbcTemplate template,
-                       ItemRepository itemRepository) {
+                       ItemRepository itemRepository,
+                       ItemShopRepository itemShopRepository) {
         this.shopRepository = shopRepository;
         this.template = template;
         this.priceRepository = priceRepository;
         this.itemRepository = itemRepository;
+        this.itemShopRepository = itemShopRepository;
     }
 
     public List<Shop> getAllShops() {
@@ -68,12 +73,14 @@ public class ShopService {
     public ShopItem getShopItem(Long shopId, Long itemId){
         ShopItem response = new ShopItem();
         Optional<Item> item = itemRepository.findById(itemId);
+        Optional<ItemShopAssociation> association = itemShopRepository.findById(new ItemShopAssociation.ItemShopAssociationId(shopId, itemId));
         if (item.isPresent()){
             response.setItemId(item.get().getItemId());
             response.setItemName(item.get().getItemName());
             response.setItemDescription(item.get().getItemDescription());
             response.setCategoryId(item.get().getCategoryId());
             response.setPrice(getActualPrice(shopId, itemId));
+            response.setUrl(association.map(ItemShopAssociation::getItemUrl).orElse(null));
             return response;
         } else {
             return null;

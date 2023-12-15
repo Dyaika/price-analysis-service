@@ -11,15 +11,7 @@ public class ShopItem {
     private String itemDescription;
     private Integer categoryId;
     private BigDecimal price;
-
-    public ShopItem(Long itemId, String itemName, String itemDescription, Integer categoryId, BigDecimal price) {
-        this.itemId = itemId;
-        this.itemName = itemName;
-        this.itemDescription = itemDescription;
-        this.categoryId = categoryId;
-        this.price = price;
-    }
-
+    private String url;
     public ShopItem() {
     }
 
