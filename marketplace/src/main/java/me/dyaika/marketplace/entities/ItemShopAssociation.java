@@ -10,6 +10,14 @@ import java.io.Serializable;
 @Table(name = "item_shop_associations")
 @IdClass(ItemShopAssociation.ItemShopAssociationId.class)
 public class ItemShopAssociation {
+    public ItemShopAssociation() {
+    }
+
+    public ItemShopAssociation(Long shopId, Long itemId, String itemUrl) {
+        this.shopId = shopId;
+        this.itemId = itemId;
+        this.itemUrl = itemUrl;
+    }
 
     @Id
     @Column(name = "shop_id")
@@ -22,13 +30,19 @@ public class ItemShopAssociation {
     @Column(name = "item_url")
     private String itemUrl;
 
-    // Другие поля и методы, если необходимо
-
     // Внутренний класс для составного ключа
     @Data
     public static class ItemShopAssociationId implements Serializable {
         private Long shopId;
         private Long itemId;
+
+        public ItemShopAssociationId() {
+        }
+
+        public ItemShopAssociationId(Long shopId, Long itemId) {
+            this.shopId = shopId;
+            this.itemId = itemId;
+        }
     }
 }
 
